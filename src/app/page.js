@@ -1,103 +1,176 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState } from 'react';
+import { FaTrash, FaArrowLeft, FaDownload, FaWhatsapp } from 'react-icons/fa';
+
+export default function StorybookApp() {
+  const [images, setImages] = useState([]);
+  const [answers, setAnswers] = useState({
+    q1: '',
+    q2: '',
+    q3: '',
+    extra: ''
+  });
+  const [story, setStory] = useState('');
+
+  // Subir imágenes
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files).slice(0, 10 - images.length);
+    const newImages = files.map(file => URL.createObjectURL(file));
+    setImages(prev => [...prev, ...newImages]);
+  };
+
+  // Eliminar imagen
+  const removeImage = (index) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Cambiar respuestas
+  const handleAnswerChange = (key, value) => {
+    setAnswers(prev => ({ ...prev, [key]: value }));
+  };
+
+  // Generar historia (simulado por ahora)
+  const handleGenerate = () => {
+    const fakeStory = `Basado en tus fotos y respuestas:
+- Lugar: ${answers.q1 || 'un rincón secreto'}
+- Emoción: ${answers.q2 || 'asombro'}
+- Recuerdo: ${answers.q3 || 'una caminata inolvidable'}
+
+${answers.extra || ''}
+
+¡Gracias por compartir tu aventura en los Andes!`;
+    setStory(fakeStory);
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
+      <header style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <h1>📖 Mi Storybook de los Andes</h1>
+        <p>Crea tu libro de viaje personalizado</p>
+      </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+      {!story ? (
+        <>
+          {/* Subida de fotos */}
+          <section style={{ marginBottom: '30px' }}>
+            <h2>Fotos de tu viaje ({images.length}/10)</h2>
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handleImageUpload}
+              disabled={images.length >= 10}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '10px' }}>
+              {images.map((src, i) => (
+                <div key={i} style={{ position: 'relative', width: '100px', height: '100px' }}>
+                  <img src={src} alt={`Foto ${i+1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+                  <button
+                    onClick={() => removeImage(i)}
+                    style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'red', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer' }}
+                  >
+                    <FaTrash size={10} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Preguntas */}
+          <section style={{ marginBottom: '30px' }}>
+            <h2>Contanos tu experiencia</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div>
+                <label><strong>1. ¿Qué lugar de los Andes te impactó más?</strong></label>
+                <input
+                  type="text"
+                  value={answers.q1}
+                  onChange={(e) => handleAnswerChange('q1', e.target.value)}
+                  style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+                />
+              </div>
+              <div>
+                <label><strong>2. ¿Qué emoción sentiste al estar allí?</strong></label>
+                <input
+                  type="text"
+                  value={answers.q2}
+                  onChange={(e) => handleAnswerChange('q2', e.target.value)}
+                  style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+                />
+              </div>
+              <div>
+                <label><strong>3. ¿Qué recuerdo te llevás para siempre?</strong></label>
+                <input
+                  type="text"
+                  value={answers.q3}
+                  onChange={(e) => handleAnswerChange('q3', e.target.value)}
+                  style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+                />
+              </div>
+              <div>
+                <label><strong>Contanos más (opcional):</strong></label>
+                <textarea
+                  value={answers.extra}
+                  onChange={(e) => handleAnswerChange('extra', e.target.value)}
+                  rows="4"
+                  style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* Botones */}
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+            <button
+              onClick={() => window.history.back()}
+              style={{ padding: '10px 20px', background: '#ccc', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+            >
+              <FaArrowLeft /> Volver
+            </button>
+            <button
+              onClick={handleGenerate}
+              disabled={images.length === 0}
+              style={{ padding: '10px 20px', background: '#4CAF50', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', opacity: images.length === 0 ? 0.5 : 1 }}
+            >
+              Generar Storybook
+            </button>
+          </div>
+        </>
+      ) : (
+        /* Vista de Storybook */
+        <div style={{ textAlign: 'center' }}>
+          <h2>✨ Tu Storybook está listo</h2>
+          <div style={{ 
+            border: '1px solid #ddd', 
+            borderRadius: '10px', 
+            padding: '20px', 
+            margin: '20px 0',
+            background: 'white',
+            minHeight: '300px'
+          }}>
+            <p style={{ whiteSpace: 'pre-line', textAlign: 'left' }}>{story}</p>
+          </div>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setStory('')}
+              style={{ padding: '10px 20px', background: '#2196F3', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+            >
+              <FaArrowLeft /> Editar
+            </button>
+            <button
+              style={{ padding: '10px 20px', background: '#4CAF50', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+            >
+              <FaDownload /> Descargar PDF
+            </button>
+            <button
+              style={{ padding: '10px 20px', background: '#25D366', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+            >
+              <FaWhatsapp /> Enviar por WhatsApp
+            </button>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      )}
     </div>
   );
 }
