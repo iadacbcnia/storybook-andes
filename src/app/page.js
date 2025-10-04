@@ -6,7 +6,7 @@ import { FaTrash, FaArrowLeft, FaDownload, FaWhatsapp, FaMicrophone } from 'reac
 // === FUNCIÓN DE IA CON GEMINI ===
 async function generarHistoriaConIA(fotos, respuestas) {
   // 🔑 PONÉ ACÁ TU CLAVE DE GEMINI (la que creaste en Google AI Studio)
-  const API_KEY = "AIzaSyCMzuW-LB5O-2-8MBGzzThUnRHCnn8HMpo";
+  // La clave se usa en el servidor, no en el cliente
 
   const prompt = `
     Eres Andes, un guía de viaje poético y amigable de la Comarca Andina.
@@ -94,15 +94,20 @@ export default function StorybookApp() {
 
   // --- GENERAR HISTORIA CON IA ---
   const handleGenerate = async () => {
-    setGenerating(true);
-    try {
-      const historia = await generarHistoriaConIA(images, answers);
-      setStory(historia);
-    } catch (error) {
-      setStory("¡Gracias por tu aventura en la Comarca Andina!\n\n(La IA no está disponible ahora, pero tu historia es igual de valiosa.)");
-    }
-    setGenerating(false);
-  };
+  setGenerating(true);
+  try {
+    const response = await fetch('/api/ia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fotos: images, respuestas: answers })
+    });
+    const data = await response.json();
+    setStory(data.historia);
+  } catch (error) {
+    setStory("¡Gracias por tu aventura en la Comarca Andina!\n\n(La IA no está disponible ahora, pero tu historia es igual de valiosa.)");
+  }
+  setGenerating(false);
+};
 
   // --- BOTONES DE ACCIÓN ---
   const handleDownloadPDF = () => {
@@ -243,9 +248,9 @@ export default function StorybookApp() {
           </div>
 
           {/* Historia */}
-          <div className="bg-emerald-50 p-4 rounded-lg mb-6">
-            <p className="whitespace-pre-line text-gray-800">{story}</p>
-          </div>
+          <div className="bg-emerald-50 p-4 rounded-lg mb-6 border border-emerald-200">
+  <p className="whitespace-pre-line text-gray-900 font-medium">{story}</p>
+</div>
 
           {/* Botones finales */}
           <div className="flex flex-wrap justify-center gap-3">
