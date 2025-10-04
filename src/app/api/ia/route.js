@@ -1,4 +1,6 @@
 // src/app/api/ia/route.js
+import fetch from 'node-fetch';
+
 export async function POST(request) {
   try {
     const { fotos, respuestas } = await request.json();
