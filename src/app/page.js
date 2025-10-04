@@ -99,12 +99,20 @@ export default function StorybookApp() {
     const response = await fetch('/api/ia', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fotos: images, respuestas: answers })
+      body: JSON.stringify({ 
+        fotos: images, 
+        respuestas: answers 
+      })
     });
+    
+    if (!response.ok) {
+      throw new Error('Error en el servidor');
+    }
+    
     const data = await response.json();
     setStory(data.historia);
   } catch (error) {
-    setStory("¡Gracias por tu aventura en la Comarca Andina!\n\n(La IA no está disponible ahora, pero tu historia es igual de valiosa.)");
+    setStory("Lo siento, no pude generar tu historia. La IA no está disponible ahora.");
   }
   setGenerating(false);
 };
